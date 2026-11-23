@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Arranger</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --plate: #141619; --panel: #1d2024; --panel2: #24282d; --well: #101215; --edge: #2c3036;
+      --text: #f1f0ec; --dim: #858a93; --silk: #b9bdc5; --acc: #5b6cff; --ink: #ffffff;
+      --ok: #3ddc84; --bad: #ff5a6a; color-scheme: dark;
+    }
+    [data-theme="grey"] {
+      --plate: #4a4e55; --panel: #555a62; --panel2: #5d626a; --well: #41454b; --edge: #6a6f78;
+      --text: #f6f5f1; --dim: #c9ccd1; --silk: #e1e3e6; --acc: #7b88ff; --ink: #ffffff;
+      --ok: #7ef0ae; --bad: #ff9aa3;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body { background: var(--plate); color: var(--text); font: 13px/1.4 ui-rounded, "SF Pro Rounded", system-ui, sans-serif; display: flex; flex-direction: column; user-select: none; -webkit-font-smoothing: antialiased; }
+    button, select { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+    svg { display: block; }
+    header { display: flex; align-items: center; padding: 12px 16px 8px; gap: 10px; }
+    h1 { margin: 0; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
+    h1 small { font-weight: 600; color: var(--dim); font-size: 11px; margin-left: 5px; }
+    .grow { flex: 1; }
+    .theme { display: flex; background: var(--well); border: 1px solid var(--edge); border-radius: 9px; padding: 2px; }
+    .theme button { width: 26px; height: 22px; border: 0; border-radius: 7px; background: none; display: grid; place-items: center; padding: 0; color: var(--dim); }
+    .theme button.on { background: var(--panel2); color: var(--text); }
+    .theme svg { width: 12px; height: 12px; }
+    select { background: var(--well); border: 1px solid var(--edge); border-radius: 8px; padding: 3px 6px; font-size: 12px; }
+    main { flex: 1; overflow: auto; padding: 2px 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+    .stage { background: var(--panel); border-radius: 14px; padding: 12px; position: relative; box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+    .strip { display: flex; gap: 4px; height: 76px; position: relative; }
+    .blk { min-width: 38px; border-radius: 10px; padding: 9px 11px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; cursor: grab; position: relative;
+      background: linear-gradient(160deg, color-mix(in srgb, var(--c) 82%, #fff) 0%, var(--c) 45%, color-mix(in srgb, var(--c) 78%, #000) 100%);
+      box-shadow: 0 2px 10px color-mix(in srgb, var(--c) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.35); transition: transform .12s, box-shadow .12s, opacity .12s; }
+    .blk::before { content: ""; position: absolute; left: 11px; right: 11px; top: 10px; height: 3px; border-radius: 2px; background: currentColor; opacity: .35; }
+    .blk:hover { transform: translateY(-1px); }
+    .blk b { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
+    .blk span { font-size: 11px; opacity: .8; white-space: nowrap; font-weight: 600; }
+    .blk.sel { box-shadow: 0 0 0 2.5px var(--text), 0 4px 16px color-mix(in srgb, var(--c) 55%, transparent); }
+    .blk.lifted { opacity: .35; }
+    .blk.busy { cursor: progress; }
+    .blk.ghost { position: fixed; height: 76px; pointer-events: none; z-index: 10; opacity: .92; transform: rotate(-2deg) scale(1.03); box-shadow: 0 12px 28px rgba(0,0,0,.45); }
+    .blk.ghost.copying::after { content: "+"; position: absolute; right: 8px; top: 4px; font-size: 20px; font-weight: 900; }
+    #dropMark { position: absolute; top: 8px; width: 4px; height: 84px; margin-left: -2px; border-radius: 2px; background: var(--text); box-shadow: 0 0 10px var(--text); pointer-events: none; }
+    .under { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11.5px; color: var(--dim); min-height: 1.3em; }
+    #dragHint { color: var(--text); font-weight: 700; }
+    .list { background: var(--panel); border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+    .sec { display: grid; grid-template-columns: 14px 1fr auto; gap: 12px; align-items: center; padding: 6px 8px 6px 10px; border-radius: 9px; cursor: default; }
+    .sec:hover { background: var(--panel2); }
+    .sec.sel { background: var(--panel2); box-shadow: inset 3px 0 0 var(--text); }
+    .dot { width: 14px; height: 14px; border-radius: 5px; }
+    .sec .nm b { font-weight: 800; }
+    .sec .nm span { color: var(--dim); font-size: 11.5px; margin-left: 10px; font-variant-numeric: tabular-nums; }
+    .acts { display: flex; gap: 2px; }
+    .ib { width: 30px; height: 28px; border: 0; border-radius: 8px; background: none; color: var(--silk); display: grid; place-items: center; padding: 0; }
+    .ib svg, #menu svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .ib:hover { background: var(--well); color: var(--text); }
+    .ib.danger:hover { color: var(--bad); }
+    .ib:disabled { opacity: .3; cursor: default; background: none; }
+    #menu { position: fixed; z-index: 20; background: var(--panel2); border: 1px solid var(--edge); border-radius: 11px; padding: 5px; min-width: 170px; box-shadow: 0 14px 34px rgba(0,0,0,.45); display: flex; flex-direction: column; }
+    #menu[hidden] { display: none; }
+    #menu button { display: flex; align-items: center; gap: 10px; border: 0; background: none; padding: 7px 10px; border-radius: 7px; text-align: left; font-weight: 600; }
+    #menu button:hover { background: var(--well); }
+    #menu button.danger { color: var(--bad); }
+    #menu button:disabled { opacity: .35; }
+    .versions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .vlab { color: var(--dim); font-size: 11.5px; font-weight: 700; margin-right: 2px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--edge); background: var(--panel); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 12px; color: var(--silk); }
+    .chip svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+    .chip:hover { border-color: var(--silk); color: var(--text); }
+    .chip.on { background: var(--text); border-color: var(--text); color: var(--plate); }
+    .chip.add { border-style: dashed; background: none; }
+    .chip:disabled { opacity: .5; }
+    .chipedit { border: 1px solid var(--acc); background: var(--well); border-radius: 999px; padding: 4px 12px; font: 700 12px ui-rounded, system-ui, sans-serif; color: var(--text); width: 120px; }
+    .empty { color: var(--dim); padding: 12px; }
+    .foot { display: flex; align-items: center; gap: 10px; }
+    .status { font-size: 12px; color: var(--dim); min-height: 1.4em; flex: 1; }
+    .status.ok { color: var(--ok); } .status.bad { color: var(--bad); }
+    .hint { color: var(--dim); font-size: 11.5px; }
+    .btn { border: 1px solid var(--edge); background: var(--well); border-radius: 9px; padding: 5px 12px; font-weight: 700; font-size: 12px; }
+    .btn:hover { border-color: var(--silk); }
+    #pasteHint { color: var(--silk); font-weight: 700; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Arranger <small id="ver"></small></h1>
+    <span class="grow"></span>
+    <div class="theme">
+      <button data-t="dark" id="tDark"><svg viewBox="0 0 16 16"><path d="M13.5 10.2A6 6 0 0 1 5.8 2.5a6 6 0 1 0 7.7 7.7z" fill="currentColor"/></svg></button>
+      <button data-t="grey" id="tGrey"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></svg></button>
+    </div>
+    <select id="lang"></select>
+  </header>
+  <main>
+    <div class="versions" id="versions"></div>
+    <div class="stage">
+      <div class="strip" id="strip"></div>
+      <div id="dropMark" hidden></div>
+      <div class="under"><span id="dragHint"></span><span id="pasteHint" hidden></span></div>
+    </div>
+    <div class="list" id="list"></div>
+    <div class="hint" id="hint"></div>
+    <div class="foot"><div class="status" id="status" role="status"></div><button class="btn" id="undoAll"></button></div>
+  </main>
+  <div id="menu" hidden></div>
+  <script src="vendor/luna.global.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

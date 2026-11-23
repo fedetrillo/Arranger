@@ -1,0 +1,28 @@
+{
+    "package_name": "Arranger",
+    "id": "com.fedetrillo.arranger",
+    "title": "Arranger",
+    "name": "Arranger",
+    "version": "1.0.0",
+    "manufacturer": "Fede Trillo",
+    "contact": "fedetrillo@gmail.com",
+    "description": [
+        "Try song arrangements in LUNA without losing the original: the markers are the sections; drag to move, Alt-drag to copy, duplicate or remove a section on every track at once, and switch between snapshots of the song with one click."
+    ],
+    "categories": [
+        "Workflow",
+        "Create"
+    ],
+    "icon": "icon.png",
+    "sdk_version": "3.1.2",
+    "min_luna_version": "3.1.2",
+    "engines": [
+        "luna"
+    ],
+    "html": "index.html",
+    "target": "window",
+    "floating": true,
+    "show_with_session": true,
+    "width": 760,
+    "height": 640
+}
