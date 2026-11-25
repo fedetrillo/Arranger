@@ -42,6 +42,9 @@ as a protected **Original**, so you can compare versions with one click.
 Tempo and meter changes stay where they are; if your song has them inside a section, check them
 after moving it.
 
+The first time it opens, it asks for your language and then a short guide walks you through the
+window in it; the **Guide** button brings it back whenever you need it.
+
 ## Support
 
 If something does not work as expected, Alt-click the version number at the top of the window:
