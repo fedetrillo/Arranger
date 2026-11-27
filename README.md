@@ -1,9 +1,8 @@
 # Arranger for LUNA
 
-Try different arrangements of a song without losing the original. The markers are the song's
-sections (INTRO, VERSE, CHORUS…): drag a section to move it, Alt-drag to copy it, duplicate or
-remove it, and the whole song follows, on every track at once. Arranger keeps the song as it was
-as a protected **Original**, so you can compare versions with one click.
+Try a new arrangement in seconds, without losing the original. Your markers become blocks you
+drag around: move, copy, duplicate or remove a whole section on every track at once. Keep each
+idea as a snapshot and switch between versions with one click.
 
 <p>
   <img src="docs/screenshot-dark.png" alt="Arranger, dark theme" width="420">

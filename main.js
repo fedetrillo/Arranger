@@ -6,7 +6,7 @@
 
 (() => {
   const $ = (id) => document.getElementById(id);
-  const VERSION = '1.0.1';
+  const VERSION = '1.0.2';
   const KEY = 'com.fedetrillo.arranger.';
   const store = {
     get: (k) => { try { return JSON.parse(localStorage.getItem(KEY + k)); } catch { return null; } },
@@ -488,7 +488,7 @@
     $('ver').onclick = async (ev) => {
       if (!ev.altKey) return;
       const text = JSON.stringify({ version: VERSION, end: endTick, tracks: tracks().map((x) => x.name.value), sections: sections().map((x) => ({ name: x.name, A: x.A, B: x.B })), log }, null, 2);
-      try { await navigator.clipboard.writeText(text); say('report', {}, 'ok', 2500); } catch { /* nothing */ }
+      try { if (await AddOnCopy(text)) say('report', {}, 'ok', 5000); } catch { /* nothing */ }
     };
     // Keep the song's end (and so the last section's length) current as clips change.
     let endTimer = 0;
